@@ -24,7 +24,7 @@ internal partial class CsvMessageWriter(Stream stream, ExportContext context)
 
     public override async ValueTask WritePreambleAsync(
         CancellationToken cancellationToken = default
-    ) => await _writer.WriteLineAsync("AuthorID,Author,Date,Content,Attachments,Reactions");
+    ) => await _writer.WriteLineAsync("AuthorID,Author,Date,MessageID,Content,Attachments,Reactions");
 
     private async ValueTask WriteAttachmentsAsync(
         IReadOnlyList<Attachment> attachments,
@@ -87,6 +87,10 @@ internal partial class CsvMessageWriter(Stream stream, ExportContext context)
         await _writer.WriteAsync(CsvEncode(Context.FormatDate(message.Timestamp, "o")));
         await _writer.WriteAsync(',');
 
+        //Message ID
+        await _writer.WriteString(CsvEncode(message.Reference.MessageId?.ToString()));
+        await _writer.WriteAsync(',');
+        
         // Message content
         if (message.IsSystemNotification)
         {
